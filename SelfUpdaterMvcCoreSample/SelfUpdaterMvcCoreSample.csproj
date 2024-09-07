@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyVersion>1.0.1.0</AssemblyVersion>
+		<FileVersion>1.0.1.0</FileVersion>
+		<InformationalVersion>1.0.1.0</InformationalVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Remove="updateinfo.json" />
+		<Content Remove="updateservice.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="updateinfo.json" />
+		<None Include="updateservice.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\UpdateManager\UpdateManager.csproj" />
+		<ProjectReference Include="..\UpdateServices\UpdateServices.csproj" />
+	</ItemGroup>
+
+</Project>

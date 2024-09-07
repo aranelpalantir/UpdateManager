@@ -1,0 +1,34 @@
+﻿@using System.Reflection
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <p>Version: @Assembly.GetExecutingAssembly().GetName().Version</p>
+    <button id="btnCheckUpdates" class="btn btn-primary">Check for Updates</button>
+</div>
+
+<script>
+    document.getElementById("btnCheckUpdates").addEventListener("click", function () {
+        // Call the server to check for updates
+        fetch('@Url.Action("CheckForUpdates", "Home")', {
+            method: 'POST'
+        })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.updateAvailable) {
+                        // Ask the user if they want to apply the update
+                                    if (confirm("Update found! Version "+data.latestVersion+" is available. Would you like to update now?")) {
+                        window.location.href = '@Url.Action("ApplyUpdate", "Home")';
+                        }
+                    } else {
+                        alert("No updates found.");
+                    }
+                })
+                .catch(error => {
+                    alert("Error checking for updates: " + error);
+                });
+    });
+</script>

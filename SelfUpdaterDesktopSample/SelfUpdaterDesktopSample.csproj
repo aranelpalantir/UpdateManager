@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyVersion>1.0.1.0</AssemblyVersion>
+		<FileVersion>1.0.1.0</FileVersion>
+		<InformationalVersion>1.0.1.0</InformationalVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\UpdateManager\UpdateManager.csproj" />
+		<ProjectReference Include="..\UpdateServices\UpdateServices.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="updateservice.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

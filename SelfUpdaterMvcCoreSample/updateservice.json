@@ -1,0 +1,10 @@
+{
+  "ExeFileName": "SelfUpdaterMvcCoreSample.exe",
+  "UpdateCheckUrl": "D:\\Projeler\\dev\\UpdateManager\\SelfUpdaterMvcCoreSample\\updateinfo.json",
+  "UpdatesFolder": "",
+  "BackupsFolder": "",
+  "ApplicationFolder": "D:\\Projeler\\dev\\UpdateManager\\SelfUpdaterMvcCoreSample\\bin\\Debug\\net8.0",
+  "ProductionArtifacts": [],
+  "ExcludeFromBackup": [ "ignore_backup.txt", "ignore_backup" ],
+  "ExcludeFromDelete": [ "ignore_delete.txt", "ignore_delete", "ignore_backup" ]
+}

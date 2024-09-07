@@ -1,0 +1,10 @@
+{
+  "ExeFileName": "SelfUpdaterDesktopSample.exe",
+  "UpdateCheckUrl": "D:\\Projeler\\dev\\UpdateManager\\SelfUpdaterDesktopSample\\updateinfo.json",
+  "UpdatesFolder": "",
+  "BackupsFolder": "",
+  "ApplicationFolder": "",
+  "ProductionArtifacts": [],
+  "ExcludeFromBackup": [ "ignore_backup.txt", "ignore_backup" ],
+  "ExcludeFromDelete": [ "ignore_delete.txt", "ignore_delete", "ignore_backup" ]
+}
