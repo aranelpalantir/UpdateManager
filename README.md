@@ -13,6 +13,7 @@ Additionally, by customizing the `updateservice.json` file and utilizing **Updat
 - **Production Artifacts Handling**: Ability to copy specific files or directories during the update process.
 - **Version Checking**: Compares current application version against the latest available update and applies updates when available.
 - **Local and Remote Update Source Support**: Checks for updates from a local file system, network share, or remote HTTP/HTTPS URLs.
+- **Application Pool Management**: Automatically stops and starts the IIS application pool during the update process if the application is hosted on IIS.
 - **Error handling and logging**: Logs detailed information during the update process, including errors.
 - **Automatic Restart**: If the application is already running, it can automatically close, update itself, and restart without requiring any additional code changes. You can launch your program via **UpdateManager**, and it will handle update checks and running the latest version automatically.
 
@@ -32,12 +33,16 @@ The `updateservice.json` file defines the settings for the update process, inclu
 {
   "ExeFileName": "YourApp.exe",
   "UpdateCheckUrl": "https://example.com/updates/updateinfo.json",
+  "LogsFolder": "C:\\path\\to\\logs",
   "UpdatesFolder": "C:\\path\\to\\updates",
   "BackupsFolder": "C:\\path\\to\\backups",
   "ApplicationFolder": "C:\\path\\to\\application",
   "ProductionArtifacts": ["artifact1", "artifact2"],
   "ExcludeFromBackup": ["file1.txt", "folder1"],
-  "ExcludeFromDelete": ["file2.txt", "folder2"]
+  "ExcludeFromDelete": ["file2.txt", "folder2"],
+  "AutoStopApplication": true,
+  "AutoRestartApplication": true,
+  "ApplicationPoolName": "poolname"
 }
 ```
 
@@ -45,12 +50,16 @@ The `updateservice.json` file defines the settings for the update process, inclu
 
 - **ExeFileName**: The name of the application’s executable file.
 - **UpdateCheckUrl**: URL or local path to the update information file (supports both remote and local sources).
+- **LogsFolder**: Folder where log files will be stored. This can be an absolute or relative path. If left empty, an `Logs` folder will be created in the same directory where the executable is running.
 - **ApplicationFolder**: The folder where the application is installed and run. This can be an absolute or relative path. If left empty, the application will use the folder where the executable is running.
 - **UpdatesFolder**: Folder where update files will be downloaded and stored. This can be an absolute or relative path. If left empty, an `Updates` folder will be created in the same directory where the executable is running.
 - **BackupsFolder**: Folder where backups of the current version will be saved. This can be an absolute or relative path. If left empty, a `Backups` folder will be created in the same directory where the executable is running.
 - **ProductionArtifacts**: List of files or directories that should be copied after the update. Paths can be absolute or relative.
 - **ExcludeFromBackup**: Files and directories to exclude from the backup process.
 - **ExcludeFromDelete**: Files and directories to exclude from deletion during the update.
+- **AutoStopApplication**: (true/false) Automatically stop the application before applying the update.
+- **AutoRestartApplication**: (true/false) Automatically restart the application after applying the update.
+- **ApplicationPoolName**: The name of the IIS application pool to stop and restart during the update process (if the application is hosted on IIS).
 
 ### Update Info Format
 
@@ -78,12 +87,13 @@ In both cases, UpdateManager can check the current version and download the upda
 ## How It Works
 
 1. **Version Check**: The application checks the current version against the version specified in the update information file.
-2. **Download Update**: If a newer version is available, the update is downloaded to the `UpdatesFolder`.
-3. **Backup**: Before applying the update, the current version is backed up (except those specified in `ExcludeFromBackup`).
-4. **Delete Existing Files**: After the backup is completed, the existing files are deleted (except those specified in `ExcludeFromDelete`).
-5. **Apply Update**: The downloaded update is extracted and applied to the `ApplicationFolder`.
-6. **Copy Production Artifacts**: If there are any specified production artifacts, they are copied after the update has been applied.
-7. **Restart**: The application restarts to complete the update process.
+2. **Stop Application**: If `AutoStopApplication` is set to `true`, the application (or IIS application pool if configured) is automatically stopped before proceeding with the update.
+3. **Download Update**: If a newer version is available, the update is downloaded to the `UpdatesFolder`.
+4. **Backup**: Before applying the update, the current version is backed up (except those specified in `ExcludeFromBackup`).
+5. **Delete Existing Files**: After the backup is completed, the existing files are deleted (except those specified in `ExcludeFromDelete`).
+6. **Apply Update**: The downloaded update is extracted and applied to the `ApplicationFolder`.
+7. **Copy Production Artifacts**: If there are any specified production artifacts, they are copied after the update has been applied.
+8. **Restart Application**: If `AutoRestartApplication` is set to `true`, the application (or IIS application pool if configured) is automatically restarted after the update is applied.
 
 
 ## Examples
@@ -190,6 +200,7 @@ private async void btnCheckUpdates_Click(object sender, EventArgs e)
     }
 }
 ```
+
 ## How to Use
 
 1. Clone the repository.
@@ -198,6 +209,11 @@ private async void btnCheckUpdates_Click(object sender, EventArgs e)
 4. Set up your update information file on a local or remote server.
 5. Start the update process via the provided sample applications.
 6. Optionally, by customizing the `updateservice.json` file and calling **UpdateManager**, the application can be closed if it's running, updated, and restarted without any additional code changes. You can launch your program via **UpdateManager**, and each time it will check for updates, download the latest version, and run the updated application.
+7. **For IIS-hosted applications**: Updates cannot be applied directly through the website while it’s running. In this case, **UpdateManager.exe** needs to be manually executed. The update process will stop the IIS application pool, apply the update, and restart the pool automatically if configured in the `updateservice.json` file.
+8. **Manual Trigger Scenarios**: In scenarios where **UpdateManager** needs to be manually triggered, **UpdateManager.exe** does not need to be included in the project itself. It can be stored and executed from a separate folder. The update logic will still function as long as the correct paths are specified in the `updateservice.json` configuration.
+9. **Handling Incomplete or Failed Updates**: In case of an incomplete or failed update, the application may need to be restored manually from the backup folder. The backups are located in the `BackupsFolder` defined in `updateservice.json`, and the desired backup can be manually copied to the `ApplicationFolder` to restore the previous version.
+
+
 
 ## License
 
