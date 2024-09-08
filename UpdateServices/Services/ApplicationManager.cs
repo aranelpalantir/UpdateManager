@@ -25,14 +25,14 @@ namespace UpdateServices.Services
                 }
             }
         }
-
+    
         public Version GetCurrentVersion(string exeFilePath)
         {
             if (File.Exists(exeFilePath))
             {
                 var versionInfo = FileVersionInfo.GetVersionInfo(exeFilePath);
-                Log.Information($"Successfully retrieved current version from executable: {versionInfo.ProductVersion} - {exeFilePath}");
-                return new Version(versionInfo.ProductVersion!);
+                Log.Information($"Successfully retrieved current version from executable: {versionInfo.FileVersion} - {exeFilePath}");
+                return new Version(versionInfo.FileVersion!);
             }
 
             // Log a more explicit message if the executable is not found
@@ -45,6 +45,41 @@ namespace UpdateServices.Services
             Log.Information($"Restarting application: {exePath}");
             Process.Start(exePath); // Launch the updated application
             Environment.Exit(0); // Terminate the current process
+        }
+
+        private async Task RunPowerShellCommandAsync(string command)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-Command \"Import-Module WebAdministration; {command}\"",
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+
+            using (var process = Process.Start(psi))
+            {
+                if (process != null)
+                {
+                    await process.WaitForExitAsync();
+                }
+            }
+
+            await Task.Delay(5000);
+        }
+       
+        public async Task StopRunningApplicationPoolAsync(string poolName)
+        {
+            Log.Information($"Stopping application pool: {poolName}");
+            var command = $"Stop-WebAppPool -Name '{poolName}'";
+            await RunPowerShellCommandAsync(command);
+        }
+        
+        public async Task StartApplicationPoolAsync(string poolName)
+        {
+            Log.Information($"Starting application pool: {poolName}");
+            var command = $"Start-WebAppPool -Name '{poolName}'";
+            await RunPowerShellCommandAsync(command);
         }
     }
 }

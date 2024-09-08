@@ -2,26 +2,34 @@
 using UpdateServices.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-var httpUrl = builder.Configuration.GetSection("Kestrel:Endpoints:Http:Url").Value;
-var httpsUrl = builder.Configuration.GetSection("Kestrel:Endpoints:Https:Url").Value;
 
-builder.WebHost.UseKestrel(options =>
+#if !DEBUG
+if (IsRunningUnderIIS())
 {
-    // HTTP için yapılandırma
-    if (!string.IsNullOrEmpty(httpUrl))
-    {
-        options.ListenAnyIP(new Uri(httpUrl).Port);
-    }
+    // Do nothing, since it's running under IIS
+}
+else
+{
+    var httpUrl = builder.Configuration.GetSection("Kestrel:Endpoints:Http:Url").Value;
+    var httpsUrl = builder.Configuration.GetSection("Kestrel:Endpoints:Https:Url").Value;
 
-    // HTTPS için yapılandırma
-    if (!string.IsNullOrEmpty(httpsUrl))
+    builder.WebHost.UseKestrel(options =>
     {
-        options.ListenAnyIP(new Uri(httpsUrl).Port, listenOptions =>
+        if (!string.IsNullOrEmpty(httpUrl))
         {
-            listenOptions.UseHttps(); // HTTPS desteği
-        });
-    }
-});
+            options.ListenAnyIP(new Uri(httpUrl).Port);
+        }
+      
+        if (!string.IsNullOrEmpty(httpsUrl))
+        {
+            options.ListenAnyIP(new Uri(httpsUrl).Port, listenOptions =>
+            {
+                listenOptions.UseHttps();
+            });
+        }
+    });
+}
+#endif
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -50,10 +58,24 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 #if !DEBUG
-OpenBrowser("http://localhost:5000");
+if (IsRunningUnderIIS())
+{
+    // Do nothing, since it's running under IIS
+}
+else
+{
+    OpenBrowser("http://localhost:5000");
+}
 #endif
 
+
+
 app.Run();
+
+bool IsRunningUnderIIS()
+{
+    return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APP_POOL_ID"));
+}
 
 void OpenBrowser(string url)
 {
@@ -67,6 +89,6 @@ void OpenBrowser(string url)
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Taray?c? aç?l?rken hata: {ex.Message}");
+        Console.WriteLine($"Error occurred while opening the browser: {ex.Message}");
     }
 }

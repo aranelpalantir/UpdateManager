@@ -3,29 +3,38 @@ using System.Text.Json;
 using UpdateServices.Config;
 using UpdateServices.Services;
 
-// Serilog configuration for console and file logging with rotation
-var logFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
-Directory.CreateDirectory(logFolderPath);
 
+var tempLogPath = Path.Combine(Directory.GetCurrentDirectory(), "temp.log");
+
+// Temporary logging configuration
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console() // Logs to console
-    .WriteTo.File(
-        Path.Combine(logFolderPath, "application.log"), // Log file path
-        rollingInterval: RollingInterval.Day, // Rotate log file daily
-        fileSizeLimitBytes: 1024 * 1024, // Set file size limit to 1 MB
-        rollOnFileSizeLimit: true, // Rotate file when size limit is reached
-        retainedFileCountLimit: 7 // Keep 7 days of log files
-    )
+    .WriteTo.Console()
+    .WriteTo.File(tempLogPath, rollingInterval: RollingInterval.Day)
     .CreateLogger();
-
 try
 {
-    Log.Information("Starting the application...");
-
     var configFilePath = "updateservice.json";
-    var config=UpdateServiceConfig.GetInstance(configFilePath);
+    var config = UpdateServiceConfig.GetInstance(configFilePath);
     if (config == null)
         return;
+
+    // Serilog configuration for console and file logging with rotation
+
+    var logFolderPath = Path.IsPathRooted(config.LogsFolder) ? config.LogsFolder : Path.Combine(Directory.GetCurrentDirectory(), config.LogsFolder!);
+    Directory.CreateDirectory(logFolderPath);
+
+    Log.Logger = new LoggerConfiguration()
+        .WriteTo.Console() // Logs to console
+        .WriteTo.File(
+            Path.Combine(logFolderPath, "application.log"), // Log file path
+            rollingInterval: RollingInterval.Day, // Rotate log file daily
+            fileSizeLimitBytes: 1024 * 1024, // Set file size limit to 1 MB
+            rollOnFileSizeLimit: true, // Rotate file when size limit is reached
+            retainedFileCountLimit: 7 // Keep 7 days of log files
+        )
+        .CreateLogger();
+
+    Log.Information("Starting the application...");
 
     // Instantiate individual services
     var backupManager = new BackupManager(config);

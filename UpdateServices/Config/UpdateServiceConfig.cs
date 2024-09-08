@@ -7,12 +7,16 @@ namespace UpdateServices.Config
     {
         public required string ExeFileName { get; set; }
         public required string UpdateCheckUrl { get; set; }
-        public string? UpdatesFolder { get; private set; }
-        public string? BackupsFolder { get; private set; }
-        public string? ApplicationFolder { get; private set; }
-        public List<string>? ProductionArtifacts { get; private set; }
-        public List<string>? ExcludeFromBackup { get; private set; }
-        public List<string>? ExcludeFromDelete { get; private set; }
+        public string? LogsFolder { get; set; }
+        public string? UpdatesFolder { get; set; }
+        public string? BackupsFolder { get; set; }
+        public string? ApplicationFolder { get; set; }
+        public List<string>? ProductionArtifacts { get; set; }
+        public List<string>? ExcludeFromBackup { get; set; }
+        public List<string>? ExcludeFromDelete { get; set; }
+        public bool? AutoStopApplication { get; set; }
+        public bool? AutoRestartApplication { get; set; }
+        public string? ApplicationPoolName { get; set; }
 
         public static UpdateServiceConfig? GetInstance(string configFilePath)
         {
@@ -36,6 +40,11 @@ namespace UpdateServices.Config
 
         private void ApplyDefaults()
         {
+            if (string.IsNullOrWhiteSpace(LogsFolder))
+            {
+                LogsFolder = "Logs";
+            }
+
             if (string.IsNullOrWhiteSpace(UpdatesFolder))
             {
                 UpdatesFolder = "Updates";
@@ -45,6 +54,7 @@ namespace UpdateServices.Config
             {
                 BackupsFolder = "Backups";
             }
+
             if (string.IsNullOrWhiteSpace(ApplicationFolder))
             {
                 ApplicationFolder = AppContext.BaseDirectory;
@@ -85,6 +95,9 @@ namespace UpdateServices.Config
                 "UpdateServices.dll",
                 "updateservice.json"
             });
+
+            AutoStopApplication ??= true;
+            AutoRestartApplication ??= true;
         }
 
     }

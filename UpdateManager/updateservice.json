@@ -1,10 +1,14 @@
 {
-  "ExeFileName": "SelfUpdaterConsoleSample.exe",
-  "UpdateCheckUrl": "D:\\Projeler\\dev\\UpdateManager\\SelfUpdaterConsoleSample\\updateinfo.json",
-  "UpdatesFolder": "",
-  "BackupsFolder": "",
-  "ApplicationFolder": "",
+  "ExeFileName": "SelfUpdaterMvcCoreSample.exe",
+  "UpdateCheckUrl": "D:\\Projeler\\dev\\UpdateManager\\SelfUpdaterMvcCoreSample\\updateinfo.json",
+  "LogsFolder": "C:\\inetpub\\selfupdater\\Logs",
+  "UpdatesFolder": "C:\\inetpub\\selfupdater\\Updates",
+  "BackupsFolder": "C:\\inetpub\\selfupdater\\Backups",
+  "ApplicationFolder": "C:\\inetpub\\selfupdater\\publish",
   "ProductionArtifacts": [],
   "ExcludeFromBackup": [ "ignore_backup.txt", "ignore_backup" ],
-  "ExcludeFromDelete": [ "ignore_delete.txt", "ignore_delete", "ignore_backup" ]
+  "ExcludeFromDelete": [ "ignore_delete.txt", "ignore_delete", "ignore_backup" ],
+  "AutoStopApplication": true,
+  "AutoRestartApplication": true,
+  "ApplicationPoolName": "selfupdater"
 }

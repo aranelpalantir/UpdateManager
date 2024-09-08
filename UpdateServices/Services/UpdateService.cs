@@ -25,12 +25,6 @@ namespace UpdateServices.Services
         {
             Log.Information("Update process started.");
 
-            // Ensure that required directories exist
-            EnsureDirectoriesExist(new[] { _config.UpdatesFolder!, _config.BackupsFolder! });
-
-            // Try to close the running application if it's already running
-            _applicationManager.StopRunningApplication(_config.ExeFileName);
-
             var currentVersion = _applicationManager.GetCurrentVersion(Path.Combine(_config.ApplicationFolder!, _config.ExeFileName));
 
             // Check for updates
@@ -38,11 +32,27 @@ namespace UpdateServices.Services
 
             if (latestUpdate != null)
             {
+                if (_config.AutoStopApplication!.Value) 
+                    if (string.IsNullOrWhiteSpace(_config.ApplicationPoolName))
+                        _applicationManager.StopRunningApplication(_config.ExeFileName);
+                    else
+                        await _applicationManager.StopRunningApplicationPoolAsync(_config.ApplicationPoolName);
+
+                // Ensure that required directories exist
+                EnsureDirectoriesExist(new[] { _config.UpdatesFolder!, _config.BackupsFolder! });
+
                 var latestUpdatePath = await _updateChecker.DownloadOrCopyUpdateAsync(latestUpdate, _config.UpdatesFolder!);
                 HandleInitialSetupOrBackup(latestUpdatePath, currentVersion);
+
+                if (_config.AutoRestartApplication!.Value)
+                    if (string.IsNullOrWhiteSpace(_config.ApplicationPoolName))
+                        _applicationManager.RestartApplication(Path.Combine(_config.ApplicationFolder!,
+                            _config.ExeFileName));
+                    else
+                        await _applicationManager.StartApplicationPoolAsync(_config.ApplicationPoolName);
             }
 
-            _applicationManager.RestartApplication(Path.Combine(_config.ApplicationFolder!, _config.ExeFileName));
+            Log.Information("Update process completed successfully.");
         }
 
         private void HandleInitialSetupOrBackup(string? latestUpdatePath, Version currentVersion)
